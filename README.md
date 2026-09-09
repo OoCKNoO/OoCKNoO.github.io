@@ -1,1 +1,2 @@
-# OoCKNoO.github.io
+# OoCKNoO
+A showcase of my work.
