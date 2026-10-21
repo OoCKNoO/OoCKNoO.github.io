@@ -13,27 +13,66 @@
   device-orientation-permission-ui="enabled: false">
 
   <a-assets>
+    <!-- GLTF Models -->
     <a-asset-item id="model0" src="https://OoCKNoO.github.io/logo.glb"></a-asset-item>
+    <!-- เพิ่มไฟล์โมเดล model1 และ model2 ให้ครบ -->
+    <!-- <a-asset-item id="model1" src="..."></a-asset-item> -->
+    <!-- <a-asset-item id="model2" src="..."></a-asset-item> -->
 
+    <!-- Audio Assets (ใส่ไฟล์เสียงของคุณที่นี่) -->
+    <audio id="audio0" src="https://OoCKNoO.github.io/voice0.mp3" preload="auto"></audio>
+    <audio id="audio1" src="https://OoCKNoO.github.io/voice1.mp3" preload="auto"></audio>
+    <audio id="audio2" src="https://OoCKNoO.github.io/voice2.mp3" preload="auto"></audio>
   </a-assets>
 
-  <!-- Target 1 -->
-  <a-entity mindar-image-target="targetIndex: 0">
+  <!-- Target 0 -->
+  <a-entity id="target0" mindar-image-target="targetIndex: 0">
     <a-gltf-model src="#model0" animation-mixer rotation="90 0 0" scale="0.5 0.5 0.5"></a-gltf-model>
-  </a-entity>
+    </a-entity>
 
-  <!-- Target 2 -->
-  <a-entity mindar-image-target="targetIndex: 1">
+  <!-- Target 1 -->
+  <a-entity id="target1" mindar-image-target="targetIndex: 1">
     <a-gltf-model src="#model1" animation-mixer></a-gltf-model>
   </a-entity>
 
-  <!-- Target 3 -->
-  <a-entity mindar-image-target="targetIndex: 2">
+  <!-- Target 2 -->
+  <a-entity id="target2" mindar-image-target="targetIndex: 2">
     <a-gltf-model src="#model2" animation-mixer></a-gltf-model>
   </a-entity>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
 </a-scene>
+
+<script>
+  // ฟังก์ชันควบคุมเสียงตาม Target
+  const setupAudioForTarget = (targetId, audioId) => {
+    const targetEl = document.querySelector(targetId);
+    const audioEl = document.querySelector(audioId);
+
+    if (!targetEl || !audioEl) return;
+
+    // เมื่อเจอตาราง/รูปเป้าหมาย (Target Found) -> ให้เล่นเสียง
+    targetEl.addEventListener("targetFound", () => {
+      audioEl.currentTime = 0; // เล่นใหม่ตั้งแต่ต้น
+      audioEl.play().catch(error => {
+        console.log("Autoplay blocked or audio failed:", error);
+      });
+    });
+
+    // เมื่อรูปหลุดจากกล้อง (Target Lost) -> ให้หยุดเสียง
+    targetEl.addEventListener("targetLost", () => {
+      audioEl.pause();
+      audioEl.currentTime = 0;
+    });
+  };
+
+  // ผูก Target กับ เสียง
+  document.addEventListener("DOMContentLoaded", () => {
+    setupAudioForTarget("#target0", "#audio0");
+    setupAudioForTarget("#target1", "#audio1");
+    setupAudioForTarget("#target2", "#audio2");
+  });
+</script>
 </body>
 </html>
