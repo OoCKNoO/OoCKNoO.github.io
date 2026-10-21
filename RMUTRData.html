@@ -7,6 +7,13 @@
 </head>
 
 <body>
+<!-- ปุ่มเริ่มประสบการณ์ AR เพื่อปลดล็อกเสียงและกล้องอย่างสมบูรณ์บนมือถือ -->
+<div id="start-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: sans-serif;">
+  <h2>ยินดีต้อนรับสู่ AR</h2>
+  <p>กรุณากดปุ่มด้านล่างเพื่อเริ่มใช้งาน</p>
+  <button id="start-button" style="padding: 12px 24px; font-size: 18px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">แตะเพื่อเริ่ม</button>
+</div>
+
 <a-scene
   mindar-image="imageTargetSrc: https://OoCKNoO.github.io/ARCH_rmutr_imgTarget.mind;"
   vr-mode-ui="enabled: false"
@@ -15,7 +22,10 @@
   <a-assets>
     <a-asset-item id="model0" src="https://OoCKNoO.github.io/logo.glb"></a-asset-item>
     <audio id="voice0" src="https://OoCKNoO.github.io/RMUTRsound.mp3" preload="auto"></audio>
-
+    
+    <!-- ถ้ามีเสียงหรือโมเดลของ Index อื่น ๆ ให้ใส่เพิ่มตรงนี้ -->
+    <!-- <a-asset-item id="model1" src="..."></a-asset-item> -->
+    <!-- <audio id="voice1" src="..." preload="auto"></audio> -->
   </a-assets>
 
   <!-- Target 1 -->
@@ -23,50 +33,55 @@
     <a-gltf-model src="#model0" animation-mixer rotation="90 0 0" scale="0.5 0.5 0.5"></a-gltf-model>
   </a-entity>
 
-  <!-- Target 2 -->
+  <!-- Target 2 (เปิดใช้งานเมื่อมีโมเดลและเสียงพร้อม) -->
+  <!-- 
   <a-entity mindar-image-target="targetIndex: 1">
     <a-gltf-model src="#model1" animation-mixer></a-gltf-model>
-  </a-entity>
-
-  <!-- Target 3 -->
-  <a-entity mindar-image-target="targetIndex: 2">
-    <a-gltf-model src="#model2" animation-mixer></a-gltf-model>
-  </a-entity>
+  </a-entity> 
+  -->
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
 </a-scene>
+
 <script>
+  document.getElementById("start-button").addEventListener("click", function () {
+    // ซ่อนหน้าจอปุ่มเริ่มต้น
+    document.getElementById("start-screen").style.display = "none";
+
+    // ปลดล็อกและเล่นเสียงเบื้องต้นเพื่อให้เบราว์เซอร์อนุญาตเล่นเสียง
+    var voices = ["voice0", "voice1", "voice2"];
+    voices.forEach(function (id) {
+      var audio = document.getElementById(id);
+      if (audio) {
+        audio.play().then(function () {
+          audio.pause();
+          audio.currentTime = 0;
+        }).catch(function (e) {
+          console.log("Unlock audio error for " + id, e);
+        });
+      }
+    });
+  });
+
   window.addEventListener("load", function () {
-    // ผูกเสียงกับ target ตามลำดับ (index 0, 1, 2)
     var voices = ["voice0", "voice1", "voice2"];
     var targets = document.querySelectorAll("[mindar-image-target]");
 
     targets.forEach(function (target, i) {
       var audio = document.getElementById(voices[i]);
-      if (!audio) return; // ถ้ายังไม่มีไฟล์เสียงของ target นี้ ก็ข้ามไป
+      if (!audio) return; 
 
       target.addEventListener("targetFound", function () {
         audio.currentTime = 0;
-        audio.play().catch(function (e) { console.log("เล่นเสียงไม่ได้:", e); });
+        audio.play().catch(function (e) { 
+          console.log("เล่นเสียงไม่ได้ (อาจจะยังไม่ปลดล็อกเสียง):", e); 
+        });
       });
 
       target.addEventListener("targetLost", function () {
         audio.pause();
       });
     });
-
-    // ปลดล็อกเสียงบนมือถือ (เบราว์เซอร์บังคับให้ต้องมีการแตะก่อน)
-    function unlockAudio() {
-      ["voice0", "voice1", "voice2"].forEach(function (id) {
-        var a = document.getElementById(id);
-        if (a) { a.play().then(function () { a.pause(); a.currentTime = 0; }).catch(function () {}); }
-      });
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("touchstart", unlockAudio);
-    }
-    document.addEventListener("click", unlockAudio);
-    document.addEventListener("touchstart", unlockAudio);
   });
 </script>
 </body>
