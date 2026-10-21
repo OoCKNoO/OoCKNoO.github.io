@@ -14,7 +14,7 @@
 
   <a-assets>
     <a-asset-item id="model0" src="https://OoCKNoO.github.io/logo.glb"></a-asset-item>
-    <audio id="voice0" src="https://montakan004.github.io/Introduction to Game and Animation.mp4" preload="auto"></audio>
+    <audio id="voice0" src="https://OoCKNoO.github.io/มหาวิทยาลัยเทคโนโลยีราชมงคลรัตนโกสินทร์.mp3" preload="auto"></audio>
 
   </a-assets>
 
@@ -36,5 +36,38 @@
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
 </a-scene>
+<script>
+  window.addEventListener("load", function () {
+    // ผูกเสียงกับ target ตามลำดับ (index 0, 1, 2)
+    var voices = ["voice0", "voice1", "voice2"];
+    var targets = document.querySelectorAll("[mindar-image-target]");
+
+    targets.forEach(function (target, i) {
+      var audio = document.getElementById(voices[i]);
+      if (!audio) return; // ถ้ายังไม่มีไฟล์เสียงของ target นี้ ก็ข้ามไป
+
+      target.addEventListener("targetFound", function () {
+        audio.currentTime = 0;
+        audio.play().catch(function (e) { console.log("เล่นเสียงไม่ได้:", e); });
+      });
+
+      target.addEventListener("targetLost", function () {
+        audio.pause();
+      });
+    });
+
+    // ปลดล็อกเสียงบนมือถือ (เบราว์เซอร์บังคับให้ต้องมีการแตะก่อน)
+    function unlockAudio() {
+      ["voice0", "voice1", "voice2"].forEach(function (id) {
+        var a = document.getElementById(id);
+        if (a) { a.play().then(function () { a.pause(); a.currentTime = 0; }).catch(function () {}); }
+      });
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("touchstart", unlockAudio);
+    }
+    document.addEventListener("click", unlockAudio);
+    document.addEventListener("touchstart", unlockAudio);
+  });
+</script>
 </body>
 </html>
